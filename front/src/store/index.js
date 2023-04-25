@@ -4,7 +4,7 @@ import {legacy_createStore, combineReducers, compose, applyMiddleware} from 'red
 import thunkMiddleware from 'redux-thunk';
 
 const rootReducers = combineReducers({
-
+    reducer: {}
 })
 
 const middleware = [thunkMiddleware];

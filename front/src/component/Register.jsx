@@ -44,10 +44,10 @@ const Register = () => {
     const register = (e) => {
          e.preventDefault();
          console.log(state);
-         
-         const {userName, email, password, confirmPassword, image} = state;
-         const formData = new formData();
+         const formData = new FormData();
 
+         const {userName, email, password, confirmPassword, image} = state;
+         
          formData.append('userName', userName);
          formData.append('email', email);
          formData.append('password', password);

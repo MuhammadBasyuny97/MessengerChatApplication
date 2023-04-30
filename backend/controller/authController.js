@@ -115,3 +115,20 @@ module.exports.userRegister = (req,res) => {
     
 })
 }
+
+module.exports.userLogin = async (req,res) => {
+    //console.log(req.body);
+    const error = [];
+    const {email ,password} = req.body;
+
+    if(!email){
+        error.push('Please provide your email')
+       }
+     if(!password){
+        error.push('Please provide your password')
+       }
+     if(email && !validator.isEmail(email)){
+        error.push('Please provide your Valid Email')
+       }
+   
+}

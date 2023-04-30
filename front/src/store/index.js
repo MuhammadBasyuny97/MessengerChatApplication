@@ -2,9 +2,10 @@ import {legacy_createStore, combineReducers, compose, applyMiddleware} from 'red
 //import { configureStore } from '@reduxjs/toolkit'
 
 import thunkMiddleware from 'redux-thunk';
+import { authReducer } from './reducers/authReducer';
 
 const rootReducers = combineReducers({
-    reducer: {}
+    auth: authReducer
 })
 
 const middleware = [thunkMiddleware];

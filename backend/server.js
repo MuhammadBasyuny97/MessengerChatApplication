@@ -7,13 +7,15 @@ const dotenv = require('dotenv');
 
 const databaseConnect = require('./config/database');
 const authRouter = require('./routes/authRoute.js');
-
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 
 dotenv.config({
     path:'backend/config/config.env'
 })
 
+app.use(bodyParser.json());
 app.use('/api/messengers',authRouter);
 
 app.get('/', (req,res) => {

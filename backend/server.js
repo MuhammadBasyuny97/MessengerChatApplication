@@ -9,6 +9,7 @@ const databaseConnect = require('./config/database');
 const authRouter = require('./routes/authRoute.js');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const messengerRouter = require('./routes/messengerRoute.js')
 
 
 dotenv.config({
@@ -16,7 +17,9 @@ dotenv.config({
 })
 
 app.use(bodyParser.json());
+app.use(cookieParser())
 app.use('/api/messengers',authRouter);
+app.use('/api/messengers',messengerRouter);
 
 app.get('/', (req,res) => {
     res.send(`<h1>This is from Backend Server</h1>`);

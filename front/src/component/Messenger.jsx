@@ -1,14 +1,15 @@
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useState, useRef} from 'react';
 import { FaEllipsisH, FaEdit, FaSistrix } from "react-icons/fa";
 import ActiveFriends from './ActiveFriends';
 import Friends from './Friends';
 import RightSide from './RightSide';
 import { useDispatch,useSelector } from 'react-redux';
-import { getFriends, messageSend } from '../store/actions/messengerActions';
+import { getFriends, messageSend, getMessage, ImageMessageSend } from '../store/actions/messengerActions';
 
 const Messenger = () => {
+    const scrollRef = useRef();
     const [currentfriend, setCurrentFriend] = useState('');
-    const {friends} = useSelector(state => state.messenger);
+    const {friends, message} = useSelector(state => state.messenger);
     const {myInfo} = useSelector(state => state.auth);
 
     const [newMessage, setNewMessage] = useState('');
@@ -41,6 +42,37 @@ const Messenger = () => {
     useEffect(() => {
         dispatch(getFriends())
     },[])
+
+    useEffect(() => {
+        dispatch(getMessage(currentfriend._id))
+    }, [currentfriend?._id])
+
+    useEffect(() => {
+      scrollRef.current?.scrollIntoView({behavior: 'smooth'});
+    }, [message])
+
+    const emojiSend = (emu) => {
+        setNewMessage(`${newMessage}` + emu)
+    }
+
+    const ImageSend = (e) => {
+        console.log(e.target.files[0]);
+        if(e.target.files.length !== 0){
+            const imageName = e.target.files[0].name;
+            const newImageName = Date.now() + imageName;
+
+            const formData = new FormData();
+
+            formData.append('senderName', myInfo.userName);
+            formData.append('receiverId', currentfriend._id);
+            formData.append('imageName', newImageName);
+            formData.append('image', e.target.files[0]);
+
+            dispatch(ImageMessageSend(formData));
+
+        }
+       
+    }
 
   return (
     <div className='messenger'>
@@ -108,7 +140,11 @@ const Messenger = () => {
                 currentfriend={currentfriend}
                 inputHandle = {inputHandle}
                 newMessage = {newMessage}  
-                sendMessage={sendMessage}       
+                sendMessage={sendMessage}
+                message = {message} 
+                scrollRef = {scrollRef}
+                emojiSend = {emojiSend}
+                ImageSend = {ImageSend}
                      /> 
              : "Please Select Your Friend" } 
             </div>

@@ -7,9 +7,13 @@ const messageModel = require('../models/messageModel');
 module.exports.getFriends = async(req,res) => {
     const myId = req.myId;
     try{
-           const friendGet = User.find({});
-           const filter = friendGet.filter (f => f.id !== myId);
-           res.status(200).json({success:true, friends: filter});
+           const friendGet = User.find({
+            _id:{
+                $ne: myId
+            }
+           });
+          // const filter = friendGet.filter (f => f.id !== myId);
+           res.status(200).json({success:true, friends: friendGet});
     }
     catch(error){
         res.status(500).json({
@@ -53,9 +57,31 @@ module.exports.getMessage = async(req,res) => {
    const fdId = req.params.id;
 
    try{
-    const getAllMessage = await messageModel.find({});
-    getAllMessage = getAllMessage.filter (m => ( (m.senderId === myId && m.receiverId === fdId) 
-                                                   || (m.receiverId === myId && m.senderId === fdId)) ) 
+    const getAllMessage = await messageModel.find({
+        $or:[{
+            $and: [{
+                senderId:{
+                    $eq:myId
+                }
+            },{
+                receiverId : {
+                    $eq:fdId
+                }
+            }]
+        },{
+            $and : [{
+                receiverId: {
+                    $eq : myId
+                }
+            },{
+                senderId : {
+                    $eq : fdId
+                }
+            }]
+        }]
+    });
+    /* getAllMessage = getAllMessage.filter (m => ( (m.senderId === myId && m.receiverId === fdId) 
+                                                   || (m.receiverId === myId && m.senderId === fdId)) )  */
     
      res.status(200).json({
         success: true,

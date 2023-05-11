@@ -6,15 +6,56 @@ import RightSide from './RightSide';
 import { useDispatch,useSelector } from 'react-redux';
 import { getFriends, messageSend, getMessage, ImageMessageSend } from '../store/actions/messengerActions';
 
+import {io} from 'socket.io-client';
+
 const Messenger = () => {
-    const scrollRef = useRef();
+
     const [currentfriend, setCurrentFriend] = useState('');
+    const [activeUsers, setActiveUsers] = useState([]);
     const {friends, message} = useSelector(state => state.messenger);
     const {myInfo} = useSelector(state => state.auth);
-
     const [newMessage, setNewMessage] = useState('');
-
+    const [socketMessage, setSocketMessage] = useState('');
     const dispatch = useDispatch();
+
+    const scrollRef = useRef();
+    const socket = useRef();
+
+    useEffect(() => {
+        console.log(socket)
+        socket.current = io('ws://localhost:8000');
+        socket.current.on('getMessage', (data) => {
+             setSocketMessage(data);
+        })
+    }, [])
+    
+    useEffect(() => {
+        if(socketMessage && currentfriend){
+            
+            if(socketMessage.senderId === currentfriend._id && socketMessage.receiverId === myInfo.id){
+                dispatch({
+                    type:'SOCKET_MESSAGE',
+                    payload: {
+                        message: socketMessage
+                    }
+                })
+            }
+        }
+        setSocketMessage('');
+    },[socketMessage])
+    
+    useEffect(() => {
+        socket.current.emit('addUser',myInfo.id, myInfo);
+    }, [])
+
+    useEffect(() => {
+        socket.current.emit('getUser',(users) => {
+            const filterUsers = users.filter(u => u.userId !== myInfo.id);
+            setActiveUsers(filterUsers);
+        });
+    }, [])
+
+   
 
     const inputHandle = e => {
         setNewMessage(e.target.value);
@@ -28,7 +69,19 @@ const Messenger = () => {
             message: newMessage ? newMessage : '❤'
 
         }
+        socket.current.emit('sendMessage', {
+            senderId: myInfo.id,
+            senderName: myInfo.userName,
+            receiverId: currentfriend._id,
+            time: new Date(),
+            message: {
+                text: newMessage ? newMessage : '❤',
+                image: ''
+            }
+
+        })
         dispatch(messageSend(data));
+        setNewMessage('');
     }
 
 
@@ -41,7 +94,7 @@ const Messenger = () => {
 
     useEffect(() => {
         dispatch(getFriends())
-    },[])
+    },[friends])
 
     useEffect(() => {
         dispatch(getMessage(currentfriend._id))
@@ -116,7 +169,12 @@ const Messenger = () => {
                         </div>
 
                         <div className='active-friends'>
-                            <ActiveFriends/>
+                            {
+                                activeUsers && activeUsers.length > 0 ? activeUsers.map(u => 
+                                <ActiveFriends user = {u} setCurrentFriend={setCurrentFriend}/> ):''
+                                
+                            }
+                            
                            
 
                         </div>
@@ -145,6 +203,7 @@ const Messenger = () => {
                 scrollRef = {scrollRef}
                 emojiSend = {emojiSend}
                 ImageSend = {ImageSend}
+                activeUsers = {activeUsers}
                      /> 
              : "Please Select Your Friend" } 
             </div>
